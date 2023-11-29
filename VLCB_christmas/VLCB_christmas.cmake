@@ -1,0 +1,11 @@
+set_source_files_properties(VLCB_christmas/VLCB_christmas.ino PROPERTIES LANGUAGE CXX)
+add_executable(VLCB_christmas VLCB_christmas/VLCB_christmas.ino)
+target_link_libraries(VLCB_christmas PUBLIC ArduinoFlags)
+target_link_libraries(VLCB_christmas PUBLIC ArduinoCore)
+target_link_libraries(VLCB_christmas PUBLIC ArduinoLibs)
+target_link_libraries(VLCB_christmas PUBLIC VLCB_Arduino)
+target_link_libraries(VLCB_christmas PUBLIC controller_library)
+target_link_libraries(VLCB_christmas PUBLIC ArduinoStreaming)
+
+arduino_avr_hex(VLCB_christmas)
+arduino_avr_upload(VLCB_christmas ${ARDUINO_PORT})
