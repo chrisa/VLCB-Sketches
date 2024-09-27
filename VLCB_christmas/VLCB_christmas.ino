@@ -14,7 +14,6 @@
 #include "CanService.h"
 #include "NodeVariableService.h"
 #include "SerialUserInterface.h"
-#include "CombinedUserInterface.h"
 #include "DcPwmTrainController.h"
 #include "EventConsumerService.h"
 #include "EventTeachingService.h"
@@ -23,7 +22,7 @@
 const byte VER_MAJ = 1;             // code major version
 const char VER_MIN = 'a';           // code minor version
 const byte VER_BETA = 0;            // code beta sub-version
-const byte MODULE_ID = 99;          // VLCB module type
+const byte MODULE_ID = 100;          // VLCB module type
 
 const byte LED_GRN = 4;             // VLCB green Unitialised LED pin
 const byte LED_YLW = 7;             // VLCB yellow Normal LED pin
@@ -38,8 +37,7 @@ const byte TC_PIN_PWM = 3;
 VLCB::Configuration modconfig;               // configuration object
 VLCB::CAN2515 can2515;                  // CAN transport object
 VLCB::LEDUserInterface ledUserInterface(LED_GRN, LED_YLW, SWITCH0);
-VLCB::SerialUserInterface serialUserInterface(&modconfig, &can2515);
-VLCB::CombinedUserInterface combinedUserInterface(&ledUserInterface, &serialUserInterface);
+VLCB::SerialUserInterface serialUserInterface(&can2515);
 VLCB::MinimumNodeService mnService;
 VLCB::CanService canService(&can2515);
 VLCB::NodeVariableService nvService;
@@ -48,8 +46,8 @@ VLCB::EventConsumerService ecService;
 VLCB::EventTeachingService etService;
 
 // Controller object
-VLCB::Controller controller(&combinedUserInterface, &modconfig, &can2515,
-                            { &mnService, &canService, &nvService, &ecService, &etService });
+VLCB::Controller controller(&modconfig,
+                            { &serialUserInterface, &ledUserInterface, &mnService, &canService, &nvService, &ecService, &etService });
 
 
 byte canError = 0;
@@ -62,7 +60,7 @@ unsigned char mname[7] = { 'D', 'C', 'C', 'M', 'D', ' ', ' ' };
 
 // forward function declarations
 void printConfig();
-void eventhandler(byte, VLCB::VlcbMessage *, bool ison, byte evval);
+void eventhandler(byte, const VLCB::VlcbMessage *);
 
 //
 /// setup VLCB - runs once at power on from setup()
@@ -127,7 +125,7 @@ void setupVLCB()
 
   // configure and start CAN bus and VLCB message processing
   can2515.setNumBuffers(2, 1);      // more buffers = more memory used, fewer = less
-  can2515.setOscFreq(8000000UL);    // select the crystal frequency of the CAN module
+  can2515.setOscFreq(16000000UL);    // select the crystal frequency of the CAN module
   can2515.setPins(10, 2);           // select pins for CAN bus CE and interrupt connections
   if (!can2515.begin())
   {
@@ -212,12 +210,11 @@ void printConfig()
 /// called from the VLCB library when a learned event is received
 /// it receives the event table index and the CAN frame
 //
-void eventhandler(byte index, VLCB::VlcbMessage *msg, bool ison, byte evval)
+void eventhandler(byte index, const VLCB::VlcbMessage *msg)
 {
   Serial << F("> event handler: index = ") << index << F(", opcode = 0x") << _HEX(msg->data[0]) << endl;
 
-  // read the value of the first event variable (EV) associated with this learned event
-  Serial << F("> ison = ") << ison << F(" EV1 = ") << evval << endl;
+  bool ison = (msg->data[0] & 0x01) == 0;
 
   switch (index) {
 

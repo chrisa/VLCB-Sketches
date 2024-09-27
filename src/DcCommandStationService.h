@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Service.h"
+#include "Controller.h"
 #include <vlcbdefs.hpp>
 
 #include "TrainController.h"
@@ -21,10 +22,9 @@ public:
   DcCommandStationService(TrainController *tc);
 
   virtual void setController(Controller *cntrl) override;
-  virtual void process(UserInterface::RequestedAction requestedAction) override;
-  virtual Processed handleMessage(unsigned int opc, VlcbMessage *msg) override;
+  virtual void process(const Action *action) override;
 
-  virtual byte getServiceID() override
+  virtual VlcbServiceTypes getServiceID() override
   {
     return SERVICE_ID_CONSUMER;
   }
@@ -39,6 +39,7 @@ private:
   TrainController *tc;
   unsigned long timerMillis;
 
+  void handleMessage(unsigned int opc, VlcbMessage *msg);
   void sendMessage(unsigned int opc, unsigned int len, ...);
 };
 

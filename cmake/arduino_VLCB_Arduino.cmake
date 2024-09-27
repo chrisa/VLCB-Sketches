@@ -8,9 +8,7 @@ add_library(VLCB_Arduino STATIC
     ${ARDUINO_USER_LIBS_PATH}/VLCB-Arduino/src/EventProducerService.cpp
     ${ARDUINO_USER_LIBS_PATH}/VLCB-Arduino/src/CanService.cpp
     ${ARDUINO_USER_LIBS_PATH}/VLCB-Arduino/src/EventTeachingService.cpp
-    ${ARDUINO_USER_LIBS_PATH}/VLCB-Arduino/src/CanTransport.cpp
     ${ARDUINO_USER_LIBS_PATH}/VLCB-Arduino/src/FlashStorage.cpp
-    ${ARDUINO_USER_LIBS_PATH}/VLCB-Arduino/src/CombinedUserInterface.cpp
     ${ARDUINO_USER_LIBS_PATH}/VLCB-Arduino/src/LED.cpp
     ${ARDUINO_USER_LIBS_PATH}/VLCB-Arduino/src/Configuration.cpp
     ${ARDUINO_USER_LIBS_PATH}/VLCB-Arduino/src/LEDUserInterface.cpp

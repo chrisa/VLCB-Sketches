@@ -26,7 +26,6 @@
 #include "CanService.h"
 #include "NodeVariableService.h"
 #include "SerialUserInterface.h"
-#include "CombinedUserInterface.h"
 #include "DcCommandStationService.h"
 #include "DcPwmTrainController.h"
 
@@ -49,8 +48,7 @@ const byte TC_PIN_PWM = 3;
 VLCB::Configuration modconfig;               // configuration object
 VLCB::CAN2515 can2515;                  // CAN transport object
 VLCB::LEDUserInterface ledUserInterface(LED_GRN, LED_YLW, SWITCH0);
-VLCB::SerialUserInterface serialUserInterface(&modconfig, &can2515);
-VLCB::CombinedUserInterface combinedUserInterface(&ledUserInterface, &serialUserInterface);
+VLCB::SerialUserInterface serialUserInterface(&can2515);
 VLCB::MinimumNodeService mnService;
 VLCB::CanService canService(&can2515);
 VLCB::NodeVariableService nvService;
@@ -58,8 +56,7 @@ VLCB::DcPwmTrainController trainController(TC_PIN_A, TC_PIN_B, TC_PIN_PWM);
 VLCB::DcCommandStationService dcsService(&trainController);
 
 // Controller object
-VLCB::Controller controller(&combinedUserInterface, &modconfig, &can2515,
-                            { &mnService, &canService, &nvService, &dcsService });
+VLCB::Controller controller(&modconfig, { &ledUserInterface, &serialUserInterface, &mnService, &canService, &nvService, &dcsService });
 
 
 byte canError = 0;

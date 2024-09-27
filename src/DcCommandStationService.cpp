@@ -24,7 +24,7 @@ namespace VLCB {
     this->module_config = cntrl->getModuleConfig();
   }
 
-  void DcCommandStationService::process(UserInterface::RequestedAction requestedAction)
+  void DcCommandStationService::process(const Action *action)
   {
     unsigned long now = millis();
     if (now > (timerMillis + TIMER_MS)) {
@@ -49,7 +49,7 @@ namespace VLCB {
     controller->sendMessage(&msg);
   }
 
-  Processed DcCommandStationService::handleMessage(unsigned int opc, VlcbMessage *msg)
+  void DcCommandStationService::handleMessage(unsigned int opc, VlcbMessage *msg)
   {
     //DEBUG_SERIAL << ">Handle Message " << endl;
     unsigned int nn = (msg->data[1] << 8) + msg->data[2];
@@ -60,26 +60,26 @@ namespace VLCB {
       {
       case OPC_RSTAT:
         controller->sendMessageWithNN(OPC_STAT, 1, 0, 7, 8, 1);
-        return PROCESSED;
+        break;
 
       case OPC_RESTP:
       case OPC_RTOF:
         tc->emergencyStop();
         controller->sendMessageWithNN(OPC_TOF);
-        return PROCESSED;
+        break;
 
       case OPC_RTON:
         tc->emergencyStopOff();
         controller->sendMessageWithNN(OPC_TON);
-        return PROCESSED;
+        break;
 
       case OPC_RLOC:
         this->sendMessage(OPC_PLOC, 4, 0, (nn >> 8) & 0x3f, nn & 0xff, tc->getSpeed() | (tc->getDirection() ? 0x80 : 0));
-        return PROCESSED;
+        break;
 
       case OPC_KLOC:
         tc->setSpeedAndDirection(SF_UNHANDLED, 0);
-        return PROCESSED;
+        break;
 
       case OPC_DSPD:
         if (nn < 128) {
@@ -88,7 +88,7 @@ namespace VLCB {
         else {
           tc->setSpeedAndDirection(SF_FORWARDS, nn - 128);
         }
-        return PROCESSED;
+        break;
 
       case OPC_STMOD:
         switch (nn)
@@ -103,15 +103,15 @@ namespace VLCB {
             tc->setSpeedSteps(128);
             break;
           }
-        return PROCESSED;
+        break;
 
       case OPC_DKEEP:
-        return PROCESSED;
+        break;
 
       default:
         // unknown or unhandled OPC
         DEBUG_SERIAL << F("> DCSS opcode 0x") << _HEX(opc) << F(" is not currently implemented")  << endl;
-        return NOT_PROCESSED;
+        break;
       }
   }
 }
